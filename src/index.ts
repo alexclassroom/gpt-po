@@ -53,9 +53,10 @@ class SharedOptionsCommand extends Command {
 
 const translateCommand = new SharedOptionsCommand("translate")
   .description("translate po file (default command)")
-  .addOption(new Option("-k, --key <key>", "openai api key").env("OPENAI_API_KEY"))
-  .addOption(new Option("--host <host>", "openai api host").env("OPENAI_API_HOST"))
-  .addOption(new Option("--model <model>", "openai model").env("OPENAI_MODEL").default("gpt-4o-mini"))
+  .addOption(new Option("-p, --provider <provider>", "api provider").choices(["openai", "anthropic", "gemini"]).default("openai"))
+  .addOption(new Option("-k, --key <key>", "api key (can also be set via OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY)"))
+  .addOption(new Option("--host <host>", "api host (can also be set via OPENAI_API_HOST, ANTHROPIC_API_HOST, GEMINI_API_HOST)"))
+  .addOption(new Option("--model <model>", "model to use (default: gpt-5-nano for openai, claude-haiku-4-5 for anthropic, gemini-2.5-flash for gemini)"))
   .addOption(new Option("--po <file>", "po file path").conflicts("dir"))
   .addOption(new Option("--dir <dir>", "po file directory").conflicts("po"))
   .option("-src, --source <lang>", "source language (ISO 639-1)", "en")
@@ -71,24 +72,39 @@ const translateCommand = new SharedOptionsCommand("translate")
   )
   .addCompileOptions()
   .action(async (args) => {
-    const { key, host, model, po, dir, source, lang, verbose, output, context, contextLength, timeout } = args;
+    const { provider, key, host, model, po, dir, source, lang, verbose, output, context, contextLength, timeout } = args;
     if (host) {
-      process.env.OPENAI_API_HOST = host;
+      if (provider === "openai") process.env.OPENAI_API_HOST = host;
+      if (provider === "anthropic") process.env.ANTHROPIC_API_HOST = host;
+      if (provider === "gemini") process.env.GEMINI_API_HOST = host;
     }
     if (key) {
-      process.env.OPENAI_API_KEY = key;
+      if (provider === "openai") process.env.OPENAI_API_KEY = key;
+      if (provider === "anthropic") process.env.ANTHROPIC_API_KEY = key;
+      if (provider === "gemini") process.env.GEMINI_API_KEY = key;
     }
-    // process.env.OPENAI_API_KEY is not set, exit
-    if (!process.env.OPENAI_API_KEY) {
+
+    if (provider === "openai" && !process.env.OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is required");
       process.exit(1);
     }
-    init();
+    if (provider === "anthropic" && !process.env.ANTHROPIC_API_KEY) {
+      console.error("ANTHROPIC_API_KEY is required");
+      process.exit(1);
+    }
+    if (provider === "gemini" && !process.env.GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is required");
+      process.exit(1);
+    }
+
+    const finalModel = model || process.env.MODEL || process.env.OPENAI_MODEL || (provider === "anthropic" ? "claude-haiku-4-5" : provider === "gemini" ? "gemini-2.5-flash" : "gpt-5-nano");
+
+    init(provider);
     const compileOptions = getCompileOptions(args);
     if (po) {
-      await translatePo(model, po, source, lang, verbose, output, context, parseInt(contextLength), parseInt(timeout), compileOptions);
+      await translatePo(provider, finalModel, po, source, lang, verbose, output, context, parseInt(contextLength), parseInt(timeout), compileOptions);
     } else if (dir) {
-      await translatePoDir(model, dir, source, lang, verbose, context, parseInt(contextLength), parseInt(timeout), compileOptions);
+      await translatePoDir(provider, finalModel, dir, source, lang, verbose, context, parseInt(contextLength), parseInt(timeout), compileOptions);
     } else {
       console.error("po file or directory is required");
       process.exit(1);

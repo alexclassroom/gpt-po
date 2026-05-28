@@ -5,6 +5,8 @@
 
 gettext(po)文件翻译工具，支持自定义系统提示词和用户字典，支持翻译指定的po文件到指定的目标语言，支持根据pot文件更新po文件。
 
+**支持的LLM提供商：** OpenAI (GPT)、Anthropic (Claude) 和 Google (Gemini)
+
 使用其他语言阅读：[English](./README.md) | 简体中文
 
 <a href="https://buymeacoffee.com/ryanhex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-red.png" alt="请我喝杯咖啡" height="41" width="174"></a>
@@ -15,16 +17,20 @@ gettext(po)文件翻译工具，支持自定义系统提示词和用户字典，
 npm install gpt-po
 ```
 
-使用此工具前先设置 `OPENAI_API_KEY`，Windows中使用 `set OPENAI_API_KEY=<key>`, Linux中 `export OPENAI_API_KEY=<key>`
+使用此工具前先设置 `API_KEY`，根据不同的提供商，使用 `OPENAI_API_KEY`，`ANTHROPIC_API_KEY` 或 `GEMINI_API_KEY`。
 
-**建议使用付费的OpenAI API以提高翻译速度，免费的OpenAI API速度较慢（一分钟3条一天200条），且有使用限制。**
+**建议使用付费API以提高翻译速度，免费API速度较慢且有使用限制。**
 
-*国内用户要设置`HTTPS_PROXY`环境变量上梯子才能用*
+*国内用户要设置`HTTPS_PROXY`环境变量上代理才能用，或者配置使用代理服务的HOST*
 
 ### 环境变量
 - `OPENAI_API_KEY`: OpenAI API密钥。
-- `OPENAI_API_HOST`: OpenAI API主机（默认：https://api.openai.com）。
-- `OPENAI_MODEL_TMP`: OpenAI模型温度（默认：0.1）。
+- `OPENAI_API_HOST`: OpenAI API主机（默认：`https://api.openai.com`）。
+- `ANTHROPIC_API_KEY`: Anthropic API密钥。
+- `ANTHROPIC_API_HOST`: Anthropic API主机。
+- `GEMINI_API_KEY`: Google Gemini API密钥。
+- `GEMINI_API_HOST`: Google Gemini API主机。
+- `MODEL_TMP`: 模型温度（默认：0.1）。这将覆盖特定于提供商的温度设置。
 
 ## 常见用法
 
@@ -58,9 +64,10 @@ npm install gpt-po
 翻译 po 文件（默认命令）
 
 选项:
-  -k, --key <key>        openai api key (环境变量: OPENAI_API_KEY)
-  --host <host>          openai api host (环境变量: OPENAI_API_HOST)
-  --model <model>        openai 模型 (默认: "gpt-4o-mini", 环境变量: OPENAI_MODEL)
+  -p, --provider <provider>  API 提供商 (可选: "openai", "anthropic", "gemini", 默认: "openai")
+  -k, --key <key>            API 密钥 (也可通过 OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY 设置)
+  --host <host>              API 主机 (也可通过 OPENAI_API_HOST, ANTHROPIC_API_HOST, GEMINI_API_HOST 设置)
+  --model <model>            要使用的模型 (默认: openai 为 gpt-5-nano, anthropic 为 claude-haiku-4-5, gemini 为 gemini-2.5-flash, 环境变量: MODEL)
   --po <file>            po 文件路径
   --dir <dir>            po 文件目录
   -src, --source <lang>  源语言 (默认: "english")

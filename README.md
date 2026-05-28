@@ -5,6 +5,8 @@
 
 Translation tool for gettext (po) files that supports custom system prompts and user dictionaries. It also supports translating specified po files to a designated target language and updating po files based on pot files.
 
+**Supported LLM Providers:** OpenAI (GPT), Anthropic (Claude), and Google (Gemini)
+
 Read in other languages: English | [简体中文](./README_zh-CN.md)
 
 <a href="https://buymeacoffee.com/ryanhex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-red.png" alt="Buy Me A Coffee" height="41" width="174"></a>
@@ -15,14 +17,18 @@ Read in other languages: English | [简体中文](./README_zh-CN.md)
 npm install gpt-po
 ```
 
-Set `OPENAI_API_KEY` before using this tool.
+Set `API_KEY` before using this tool. Depending on the provider, use `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY`.
 
-**It is recommended to use the paid OpenAI API to improve translation speed, as the free OpenAI API is slower (only 3 translations per minute) and has usage restrictions.**
+**It is recommended to use paid APIs to improve translation speed, as free tiers are often slower and have usage restrictions.**
 
 ### Environment Variables
 - `OPENAI_API_KEY`: OpenAI API key.
-- `OPENAI_API_HOST`: OpenAI API host (default: https://api.openai.com).
-- `OPENAI_MODEL_TMP`: OpenAI model temperature (default: 0.1).
+- `OPENAI_API_HOST`: OpenAI API host (default: `https://api.openai.com`).
+- `ANTHROPIC_API_KEY`: Anthropic API key.
+- `ANTHROPIC_API_HOST`: Anthropic API host.
+- `GEMINI_API_KEY`: Google Gemini API key.
+- `GEMINI_API_HOST`: Google Gemini API host.
+- `MODEL_TMP`: Model temperature (default: 0.1). This will override provider-specific temperature settings.
 
 ## Usage Scenarios
 
@@ -56,9 +62,10 @@ Usage: gpt-po [options]
 translate po file (default command)
 
 Options:
-  -k, --key <key>        openai api key (env: OPENAI_API_KEY)
-  --host <host>          openai api host (env: OPENAI_API_HOST)
-  --model <model>        openai model (default: "gpt-4o-mini", env: OPENAI_MODEL)
+  -p, --provider <provider>  API provider (choices: "openai", "anthropic", "gemini", default: "openai")
+  -k, --key <key>            API key (can also be set via OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY)
+  --host <host>              API host (can also be set via OPENAI_API_HOST, ANTHROPIC_API_HOST, GEMINI_API_HOST)
+  --model <model>            Model to use (default: gpt-5-nano for openai, claude-haiku-4-5 for anthropic, gemini-2.5-flash for gemini, env: MODEL)
   --po <file>            po file path
   --dir <dir>            po file directory
   -src, --source <lang>  source language (default: "english")
